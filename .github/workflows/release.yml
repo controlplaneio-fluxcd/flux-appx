@@ -17,6 +17,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     permissions:
+      contents: write # for creating the GitHub release.
       id-token: write # for creating OIDC tokens for signing.
       packages: write # for pushing and signing container images.
     steps:
