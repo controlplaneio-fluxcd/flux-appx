@@ -1,8 +1,11 @@
-name: build-push
+name: push-image
 on:
   push:
     branches:
-      - '*'
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
   workflow_dispatch:
 
 permissions:
@@ -19,12 +22,12 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          VERSION="${GITHUB_SHA}"
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF/refs\/tags\//}
+          IMAGE_TAG="${{ github.ref_name }}-${GITHUB_SHA::8}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          if [[ -z $PR_NUMBER ]]; then
+              IMAGE_TAG="pr-${PR_NUMBER}-${GITHUB_SHA::8}"
           fi
-          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
       - name: Setup QEMU
         uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a # v3.3.0
       - name: Setup Docker Buildx
@@ -43,7 +46,7 @@ jobs:
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ steps.prep.outputs.VERSION }}
+            type=raw,value=${{ steps.prep.outputs.IMAGE_TAG }}
       - name: Publish images
         id: build-push
         uses: docker/build-push-action@b32b51a8eda65d6793cd0494a773d4f6bcef32dc # v6.11.0
