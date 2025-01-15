@@ -22,10 +22,11 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          IMAGE_TAG="${{ github.ref_name }}-${GITHUB_SHA::8}"
+          IMAGE_TAG="${{ github.ref_name }}-${GITHUB_SHA::7}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_SHA="${{ github.event.pull_request.head.sha }}"
           if [[ ! -z $PR_NUMBER ]]; then
-              IMAGE_TAG="pr-${PR_NUMBER}-${GITHUB_SHA::8}"
+              IMAGE_TAG="pr-${PR_NUMBER}-${PR_SHA::7}"
           fi
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
       - name: Setup QEMU
